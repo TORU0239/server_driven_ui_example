@@ -1,5 +1,6 @@
 // Action model variants parsed from JSON to drive side-effects like navigation,
 // external URL opening, toasts, or analytics tracking.
+// Simplified: no "label" field in the schema.
 
 /// Base type for all actions. Concrete variants are parsed from JSON.
 abstract class ServerDrivenUIAction {
@@ -9,6 +10,7 @@ abstract class ServerDrivenUIAction {
   static ServerDrivenUIAction? tryParse(dynamic value) {
     if (value is! Map<String, dynamic>) return null;
     final type = (value['type'] as String?)?.toLowerCase();
+
     switch (type) {
       case 'navigate':
         return NavigateAction(route: value['route'] as String? ?? '/');
@@ -29,25 +31,25 @@ abstract class ServerDrivenUIAction {
 
 /// Navigates to another in-app route or opens an external URL if the route is a full URL.
 class NavigateAction extends ServerDrivenUIAction {
-  final String route;
   const NavigateAction({required this.route});
+  final String route;
 }
 
 /// Opens an external URL using the platform browser.
 class OpenUrlAction extends ServerDrivenUIAction {
-  final String url;
   const OpenUrlAction({required this.url});
+  final String url;
 }
 
 /// Shows a short-lived toast (Snackbar).
 class ToastAction extends ServerDrivenUIAction {
-  final String message;
   const ToastAction({required this.message});
+  final String message;
 }
 
 /// Emits an analytics tracking event with optional properties.
 class TrackAction extends ServerDrivenUIAction {
+  const TrackAction({required this.event, this.props});
   final String event;
   final Map<String, dynamic>? props;
-  const TrackAction({required this.event, this.props});
 }

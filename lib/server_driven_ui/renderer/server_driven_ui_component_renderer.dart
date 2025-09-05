@@ -1,7 +1,10 @@
 // Maps a typed ServerDrivenUIComponent to actual Flutter widgets.
 // Pure rendering only; side-effects are delegated to the action handler.
+// Card action buttons can show a custom label from JSON ("label"), otherwise
+// a derived label based on the action content is used.
 
 import 'package:flutter/material.dart';
+import '../actions/server_driven_ui_actions.dart';
 import '../actions/server_driven_ui_action_handler.dart';
 import '../models/server_driven_ui_component.dart';
 
@@ -58,12 +61,15 @@ class ServerDrivenUIComponentRenderer extends StatelessWidget {
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
+                    runSpacing: 8,
                     children: c.actions
                         .map(
-                          (a) => OutlinedButton(
-                            onPressed: () =>
-                                ServerDrivenUIActionHandler.handle(context, a),
-                            child: const Text('Action'),
+                          (la) => OutlinedButton(
+                            onPressed: () => ServerDrivenUIActionHandler.handle(
+                              context,
+                              la.action,
+                            ),
+                            child: Text(la.label ?? _labelForAction(la.action)),
                           ),
                         )
                         .toList(),
@@ -77,7 +83,8 @@ class ServerDrivenUIComponentRenderer extends StatelessWidget {
       case UnknownComponent _:
         return const SizedBox.shrink();
     }
-    // Default return to satisfy non-nullable Widget return type
+
+    // Analyzer-satisfying fallback: should never be reached.
     return const SizedBox.shrink();
   }
 
@@ -88,5 +95,41 @@ class ServerDrivenUIComponentRenderer extends StatelessWidget {
       return Image.asset(assetPath, fit: c.fit);
     }
     return Image.network(c.url, fit: c.fit);
+  }
+
+  /// Computes a human-friendly label from the action content (no label stored in action).
+  String _labelForAction(ServerDrivenUIAction a) {
+    if (a is NavigateAction) {
+      final r = a.route.trim();
+      if (r == 'back') return 'Back';
+      if (_looksLikeUrl(r)) return 'Open Link';
+      if (r.startsWith('/')) {
+        final name = r.substring(1).isEmpty ? 'Home' : r.substring(1);
+        return 'Go to ${_titleCase(name)}';
+      }
+      return 'Navigate';
+    }
+
+    if (a is OpenUrlAction) {
+      final host = Uri.tryParse(a.url)?.host;
+      return (host == null || host.isEmpty) ? 'Open Link' : 'Open $host';
+    }
+
+    if (a is ToastAction) return 'Show Toast';
+    if (a is TrackAction) return 'Track Event';
+
+    return 'Action';
+  }
+
+  bool _looksLikeUrl(String s) =>
+      s.startsWith('http://') || s.startsWith('https://');
+
+  String _titleCase(String s) {
+    if (s.isEmpty) return s;
+    final parts = s
+        .split(RegExp(r'[-_/ ]+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
+    return parts.map((p) => p[0].toUpperCase() + p.substring(1)).join(' ');
   }
 }

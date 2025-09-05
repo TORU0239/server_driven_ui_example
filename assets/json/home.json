@@ -2,25 +2,26 @@
   "version": 1,
   "title": "Home",
   "components": [
-    {
-      "type": "header",
-      "text": "Welcome 👋 (Local JSON)"
-    },
+    { "type": "header", "text": "Welcome 👋 (Local JSON)" },
+    { "type": "text", "text": "This Home page demonstrates components and labeled card actions." },
+
+    { "type": "image", "url": "asset://images/banner.jpg", "fit": "cover" },
+
     {
       "type": "card",
-      "title": "Promo",
-      "body": "Rendered from local Home JSON.",
+      "title": "Promo Card",
+      "body": "Card supports multiple actions with optional labels.",
       "actions": [
-        {
-          "type": "navigate",
-          "route": "/detail"
-        }
+        { "type": "navigate", "route": "/detail", "label": "View Detail" },
+        { "type": "toast", "message": "Hello from Card Action!", "label": "Say Hello" },
+        { "type": "open_url", "url": "https://example.com", "label": "Open Example" },
+        { "type": "track", "event": "promo_clicked", "props": { "origin": "home_card" }, "label": "Track Promo" }
       ]
     },
-    {
-      "type": "image",
-      "url": "asset://images/banner.jpg",
-      "fit": "cover"
-    }
+
+    { "type": "button", "text": "Go to Detail", "action": { "type": "navigate", "route": "/detail" } },
+    { "type": "button", "text": "Say Hi (Toast)", "action": { "type": "toast", "message": "Hi from Button!" } },
+    { "type": "button", "text": "Visit Example.com", "action": { "type": "open_url", "url": "https://example.com" } },
+    { "type": "button", "text": "Track Event (Console)", "action": { "type": "track", "event": "home_track_tap", "props": { "from": "home_button" } } }
   ]
 }

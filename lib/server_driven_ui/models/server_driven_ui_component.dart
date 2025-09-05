@@ -6,7 +6,6 @@ import '../actions/server_driven_ui_actions.dart';
 import '../util/boxfit_parser.dart';
 
 /// Base class for all server-driven components.
-/// Concrete subtypes represent specific UI elements like text, image, button, etc.
 abstract class ServerDrivenUIComponent {
   const ServerDrivenUIComponent();
 
@@ -28,10 +27,21 @@ abstract class ServerDrivenUIComponent {
           action: ServerDrivenUIAction.tryParse(json['action']),
         );
       case 'card':
-        final acts = (json['actions'] as List<dynamic>? ?? [])
-            .map((e) => ServerDrivenUIAction.tryParse(e))
-            .whereType<ServerDrivenUIAction>()
-            .toList();
+        // Parse actions as (action, label) pairs without storing label in the action itself.
+        final rawActs = (json['actions'] as List<dynamic>? ?? []);
+        final acts = <LabeledAction>[];
+        for (final raw in rawActs) {
+          if (raw is Map<String, dynamic>) {
+            final act = ServerDrivenUIAction.tryParse(raw);
+            if (act != null) {
+              final labelRaw = (raw['label'] as String?)?.trim();
+              final label = (labelRaw == null || labelRaw.isEmpty)
+                  ? null
+                  : labelRaw;
+              acts.add(LabeledAction(action: act, label: label));
+            }
+          }
+        }
         return CardComponent(
           title: json['title'] as String? ?? '',
           body: json['body'] as String? ?? '',
@@ -69,11 +79,19 @@ class ButtonComponent extends ServerDrivenUIComponent {
   const ButtonComponent({required this.text, this.action});
 }
 
-/// Card layout with title, body, and optional action buttons.
+/// A pair of an action and an optional UI label (from JSON "label").
+/// We keep labels OUT of the action classes by design.
+class LabeledAction {
+  final ServerDrivenUIAction action;
+  final String? label;
+  const LabeledAction({required this.action, this.label});
+}
+
+/// Card layout with title, body, and optional action buttons (with optional labels).
 class CardComponent extends ServerDrivenUIComponent {
   final String title;
   final String body;
-  final List<ServerDrivenUIAction> actions;
+  final List<LabeledAction> actions;
   const CardComponent({
     required this.title,
     required this.body,

@@ -51,7 +51,7 @@ class ServerDrivenUIActionHandler {
         messenger.showSnackBar(
           SnackBar(
             content: Text(action.message),
-            // ⬇️ closable 옵션이 true면 닫기 버튼을 노출
+            // ⬇️ show close button when closable is equal to true
             action: action.closable
                 ? SnackBarAction(
                     label: (action.closeLabel?.trim().isNotEmpty ?? false)

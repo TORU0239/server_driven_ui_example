@@ -14,14 +14,14 @@
       "actions": [
         { "type": "navigate", "route": "/detail", "label": "View Detail" },
         { "type": "toast", "message": "Hello from Card Action!", "label": "Say Hello" },
-        { "type": "open_url", "url": "https://example.com", "label": "Open Example" },
+        { "type": "open_url", "url": "https://google.com", "label": "Open Google" },
         { "type": "track", "event": "promo_clicked", "props": { "origin": "home_card" }, "label": "Track Promo" }
       ]
     },
 
     { "type": "button", "text": "Go to Detail", "action": { "type": "navigate", "route": "/detail" } },
     { "type": "button", "text": "Say Hi (Toast)", "action": { "type": "toast", "message": "Hi from Button!" } },
-    { "type": "button", "text": "Visit Example.com", "action": { "type": "open_url", "url": "https://example.com" } },
+    { "type": "button", "text": "Visit Google.com", "action": { "type": "open_url", "url": "https://google.com" } },
     { "type": "button", "text": "Track Event (Console)", "action": { "type": "track", "event": "home_track_tap", "props": { "from": "home_button" } } }
   ]
 }

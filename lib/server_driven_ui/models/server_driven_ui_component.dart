@@ -1,9 +1,11 @@
-// Component union (sealed-like) with a factory parser by "type".
-// Each concrete component only holds data; rendering is handled separately.
+// Component union with factory parser by "type".
+// Added: HorizontalListComponent + SquareCardItem
+// CardComponent now supports an optional primaryAction for card-wide tap.
 
 import 'package:flutter/material.dart';
 import '../actions/server_driven_ui_actions.dart';
 import '../util/boxfit_parser.dart';
+import '../util/color_parser.dart';
 
 /// Base class for all server-driven components.
 abstract class ServerDrivenUIComponent {
@@ -26,27 +28,50 @@ abstract class ServerDrivenUIComponent {
           text: json['text'] as String? ?? 'Button',
           action: ServerDrivenUIAction.tryParse(json['action']),
         );
+
       case 'card':
-        // Parse actions as (action, label) pairs without storing label in the action itself.
-        final rawActs = (json['actions'] as List<dynamic>? ?? []);
-        final acts = <LabeledAction>[];
-        for (final raw in rawActs) {
-          if (raw is Map<String, dynamic>) {
-            final act = ServerDrivenUIAction.tryParse(raw);
-            if (act != null) {
-              final labelRaw = (raw['label'] as String?)?.trim();
-              final label = (labelRaw == null || labelRaw.isEmpty)
-                  ? null
-                  : labelRaw;
-              acts.add(LabeledAction(action: act, label: label));
+        {
+          // Optional primary tap action for the card itself.
+          final primary = ServerDrivenUIAction.tryParse(json['action']);
+          // Button actions (with optional per-button label).
+          final rawActs = (json['actions'] as List<dynamic>? ?? []);
+          final acts = <LabeledAction>[];
+          for (final raw in rawActs) {
+            if (raw is Map<String, dynamic>) {
+              final act = ServerDrivenUIAction.tryParse(raw);
+              if (act != null) {
+                final labelRaw = (raw['label'] as String?)?.trim();
+                final label = (labelRaw == null || labelRaw.isEmpty)
+                    ? null
+                    : labelRaw;
+                acts.add(LabeledAction(action: act, label: label));
+              }
             }
           }
+          return CardComponent(
+            title: json['title'] as String? ?? '',
+            body: json['body'] as String? ?? '',
+            actions: acts,
+            primaryAction: primary,
+          );
         }
-        return CardComponent(
-          title: json['title'] as String? ?? '',
-          body: json['body'] as String? ?? '',
-          actions: acts,
-        );
+
+      case 'horizontal_list':
+        {
+          final title = json['title'] as String?;
+          final itemsRaw = (json['items'] as List<dynamic>? ?? []);
+          final items = <SquareCardItem>[];
+          for (final it in itemsRaw) {
+            if (it is Map<String, dynamic>) {
+              final type = (it['type'] as String?)?.toLowerCase();
+              if (type == 'square_card') {
+                items.add(SquareCardItem.fromJson(it));
+              }
+            }
+          }
+          return HorizontalListComponent(title: title, items: items);
+        }
+
       default:
         return UnknownComponent(raw: json);
     }
@@ -79,24 +104,62 @@ class ButtonComponent extends ServerDrivenUIComponent {
   const ButtonComponent({required this.text, this.action});
 }
 
-/// A pair of an action and an optional UI label (from JSON "label").
-/// We keep labels OUT of the action classes by design.
+/// A pair of an action and an optional UI label (from JSON "label") for button rows.
 class LabeledAction {
   final ServerDrivenUIAction action;
   final String? label;
   const LabeledAction({required this.action, this.label});
 }
 
-/// Card layout with title, body, and optional action buttons (with optional labels).
+/// Card layout with title/body and optional buttons.
+/// [primaryAction] is executed when the card itself is tapped.
 class CardComponent extends ServerDrivenUIComponent {
   final String title;
   final String body;
   final List<LabeledAction> actions;
+  final ServerDrivenUIAction? primaryAction;
   const CardComponent({
     required this.title,
     required this.body,
     required this.actions,
+    this.primaryAction,
   });
+}
+
+/// Horizontal list of square product-like cards.
+class HorizontalListComponent extends ServerDrivenUIComponent {
+  final String? title;
+  final List<SquareCardItem> items;
+  const HorizontalListComponent({this.title, required this.items});
+}
+
+/// A 150x150 square card item used inside [HorizontalListComponent].
+class SquareCardItem {
+  final String title;
+  final String? subtitle;
+  final String? image; // asset://... or http(s)://...
+  final Color? bgColor; // parsed from hex like "#F3F6FF"
+  final ServerDrivenUIAction action;
+
+  const SquareCardItem({
+    required this.title,
+    this.subtitle,
+    this.image,
+    this.bgColor,
+    required this.action,
+  });
+
+  factory SquareCardItem.fromJson(Map<String, dynamic> json) {
+    return SquareCardItem(
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String?,
+      image: json['image'] as String?,
+      bgColor: parseHexColor(json['bgColor'] as String?),
+      action:
+          ServerDrivenUIAction.tryParse(json['action']) ??
+          const ToastAction(message: 'Tapped'),
+    );
+  }
 }
 
 /// Unknown component used as a safety net for forward-compatible JSON.

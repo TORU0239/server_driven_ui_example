@@ -1,22 +1,71 @@
 {
   "version": 1,
-  "title": "Detail",
+  "title": "SuperSoft Hoodie",
   "components": [
+    { "type": "header", "text": "SuperSoft Hoodie" },
+    { "type": "image", "url": "asset://images/banner.jpg", "fit": "cover" },
+
+    { "type": "text", "text": "Ultra-soft fleece. Relaxed fit. 100% cotton lining. Limited colorways." },
+
     {
-      "type": "header",
-      "text": "Detail Page (Local JSON)"
+      "type": "card",
+      "title": "Price & Actions",
+      "body": "$49.90  •  Free shipping over $60",
+      "action": { "type": "toast", "message": "Added to cart!" },
+      "actions": [
+        { "type": "toast", "message": "Added to cart!", "label": "Add to Cart" },
+        { "type": "navigate", "route": "back", "label": "Back" },
+        { "type": "open_url", "url": "https://amazon.com", "label": "More Info" }
+      ]
     },
+
     {
-      "type": "text",
-      "text": "This screen loads its own local JSON on open."
-    },
-    {
-      "type": "button",
-      "text": "Go Back",
-      "action": {
-        "type": "navigate",
-        "route": "back"
-      }
+      "type": "horizontal_list",
+      "title": "You may also like",
+      "items": [
+        {
+          "type": "square_card",
+          "title": "Oversize Tee",
+          "subtitle": "$19.90",
+          "bgColor": "#F3F6FF",
+          "action": { "type": "toast", "message": "Oversize Tee tapped" }
+        },
+        {
+          "type": "square_card",
+          "title": "Jogger Pants",
+          "subtitle": "$29.90",
+          "bgColor": "#FFF4F2",
+          "action": { "type": "toast", "message": "Jogger Pants tapped" }
+        },
+        {
+          "type": "square_card",
+          "title": "Basic Cap",
+          "subtitle": "$9.90",
+          "bgColor": "#F5FFF6",
+          "action": { "type": "toast", "message": "Basic Cap tapped" }
+        },
+        {
+          "type": "square_card",
+          "title": "Oversize Tee",
+          "subtitle": "$19.90",
+          "bgColor": "#F3F6FF",
+          "action": { "type": "toast", "message": "Oversize Tee tapped" }
+        },
+        {
+          "type": "square_card",
+          "title": "Jogger Pants",
+          "subtitle": "$29.90",
+          "bgColor": "#FFF4F2",
+          "action": { "type": "toast", "message": "Jogger Pants tapped" }
+        },
+        {
+          "type": "square_card",
+          "title": "Basic Cap",
+          "subtitle": "$9.90",
+          "bgColor": "#F5FFF6",
+          "action": { "type": "toast", "message": "Basic Cap tapped" }
+        }
+      ]
     }
   ]
 }

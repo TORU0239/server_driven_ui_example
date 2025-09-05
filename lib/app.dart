@@ -1,13 +1,17 @@
-import 'package:flutter/material.dart';
-import 'sdui_page_screen.dart';
+// Application root that wires routing to Server-Driven UI page screens.
+// Convention over configuration: route string -> local JSON path is resolved at runtime.
 
-class ServerDrivenUIApp extends StatelessWidget {
-  const ServerDrivenUIApp({super.key});
+import 'package:flutter/material.dart';
+import 'server_driven_ui/screen/server_driven_ui_page_screen.dart';
+
+/// App root for the Server-Driven UI sample (local assets only).
+class ServerDrivenUIApplication extends StatelessWidget {
+  const ServerDrivenUIApplication({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SDUI Playground (Local Only)',
+      title: 'Server-Driven UI (Local Only)',
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {
         final routeName = settings.name ?? '/';
@@ -15,6 +19,7 @@ class ServerDrivenUIApp extends StatelessWidget {
           settings: settings,
           builder: (_) => ServerDrivenUIPageScreen(
             routeName: routeName,
+            // Fallback title when the JSON doesn't provide one
             pageTitleFallback: routeName == '/'
                 ? 'Home'
                 : routeName.replaceFirst('/', '').toUpperCase(),

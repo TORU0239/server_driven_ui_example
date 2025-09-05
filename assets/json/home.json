@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "title": "Home",
+  "components": [
+    {
+      "type": "header",
+      "text": "Welcome 👋 (Local JSON)"
+    },
+    {
+      "type": "card",
+      "title": "Promo",
+      "body": "Rendered from local Home JSON.",
+      "actions": [
+        {
+          "type": "navigate",
+          "route": "/detail"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "url": "asset://images/banner.jpg",
+      "fit": "cover"
+    }
+  ]
+}

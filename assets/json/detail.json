@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "title": "Detail",
+  "components": [
+    {
+      "type": "header",
+      "text": "Detail Page (Local JSON)"
+    },
+    {
+      "type": "text",
+      "text": "This screen loads its own local JSON on open."
+    },
+    {
+      "type": "button",
+      "text": "Go Back",
+      "action": {
+        "type": "navigate",
+        "route": "back"
+      }
+    }
+  ]
+}

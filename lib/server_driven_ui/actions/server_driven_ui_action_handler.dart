@@ -47,9 +47,21 @@ class ServerDrivenUIActionHandler {
 
     if (action is ToastAction) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(action.message)));
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(action.message),
+            // ⬇️ closable 옵션이 true면 닫기 버튼을 노출
+            action: action.closable
+                ? SnackBarAction(
+                    label: (action.closeLabel?.trim().isNotEmpty ?? false)
+                        ? action.closeLabel!.trim()
+                        : 'Close',
+                    onPressed: () => messenger.hideCurrentSnackBar(),
+                  )
+                : null,
+          ),
+        );
       }
       return;
     }

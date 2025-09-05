@@ -1,12 +1,9 @@
-// Action model variants parsed from JSON to drive side-effects like navigation,
-// external URL opening, toasts, or analytics tracking.
-// Simplified: no "label" field in the schema.
+// Action model variants parsed from JSON.
+// Only ToastAction changed to support an optional close button.
 
-/// Base type for all actions. Concrete variants are parsed from JSON.
 abstract class ServerDrivenUIAction {
   const ServerDrivenUIAction();
 
-  /// Parses a JSON object into a typed [ServerDrivenUIAction] or returns null if unknown.
   static ServerDrivenUIAction? tryParse(dynamic value) {
     if (value is! Map<String, dynamic>) return null;
     final type = (value['type'] as String?)?.toLowerCase();
@@ -17,7 +14,18 @@ abstract class ServerDrivenUIAction {
       case 'open_url':
         return OpenUrlAction(url: value['url'] as String? ?? '');
       case 'toast':
-        return ToastAction(message: value['message'] as String? ?? '');
+        // NEW: closable + closeLabel support (various key aliases accepted)
+        final closable =
+            (value['closable'] == true) || (value['close'] == true);
+        final closeLabel =
+            (value['closeLabel'] as String?) ??
+            (value['close_label'] as String?) ??
+            (value['actionLabel'] as String?);
+        return ToastAction(
+          message: value['message'] as String? ?? '',
+          closable: closable,
+          closeLabel: closeLabel,
+        );
       case 'track':
         return TrackAction(
           event: value['event'] as String? ?? 'event',
@@ -29,25 +37,34 @@ abstract class ServerDrivenUIAction {
   }
 }
 
-/// Navigates to another in-app route or opens an external URL if the route is a full URL.
 class NavigateAction extends ServerDrivenUIAction {
   const NavigateAction({required this.route});
   final String route;
 }
 
-/// Opens an external URL using the platform browser.
 class OpenUrlAction extends ServerDrivenUIAction {
   const OpenUrlAction({required this.url});
   final String url;
 }
 
-/// Shows a short-lived toast (Snackbar).
+// CHANGED: ToastAction now supports an optional close button.
 class ToastAction extends ServerDrivenUIAction {
-  const ToastAction({required this.message});
+  const ToastAction({
+    required this.message,
+    this.closable = false,
+    this.closeLabel,
+  });
+
+  /// Snackbar message text.
   final String message;
+
+  /// Whether to show a close button as SnackBarAction.
+  final bool closable;
+
+  /// Optional label for the close action (defaults to "Close" if closable is true).
+  final String? closeLabel;
 }
 
-/// Emits an analytics tracking event with optional properties.
 class TrackAction extends ServerDrivenUIAction {
   const TrackAction({required this.event, this.props});
   final String event;

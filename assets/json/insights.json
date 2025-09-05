@@ -25,7 +25,12 @@
           "delta": "+5%",
           "bgColor": "#F5FFF6",
           "icon": "shopping_cart",
-          "action": { "type": "toast", "message": "Orders tapped" }
+          "action": {
+            "type": "toast",
+            "message": "Orders tapped",
+            "closable": true,
+            "closeLabel": "Dismiss"
+          }
         },
         {
           "type": "metric_card",

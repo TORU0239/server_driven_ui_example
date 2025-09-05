@@ -17,16 +17,20 @@ This is ideal for demonstrating architecture thinking and product-grade code qua
 
 
 ## Supported View Types
+| Type                    | JSON `type`       | Notes                                                                                                                |
+| ----------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Header                  | `header`          | Large, bold section header                                                                                           |
+| Text                    | `text`            | Paragraph/body text                                                                                                  |
+| Image                   | `image`           | `asset://` and `http(s)://`, supports `fit`                                                                          |
+| Button                  | `button`          | Single action button (`action`)                                                                                      |
+| Card                    | `card`            | Title/body, **card-wide `action` (primary tap)**, and button row (`actions[]`, optional `"label"`)                   |
+| Horizontal List         | `horizontal_list` | Title + horizontal scroll of items                                                                                   |
+| Square Card (item)      | `square_card`     | Used inside `horizontal_list`, **150Ã—150** card with bg/image + tap `action`                                         |
+| **Grid (NEW)**          | `grid`            | Title + grid of metric cards (2 columns by default)                                                                  |
+| **Metric Card (item)**  | `metric_card`     | Used inside `grid`, shows `title/value/delta`, optional `bgColor`/`icon`, tap `action`                               |
+| **Vertical List (NEW)** | `vertical_list`   | Title + vertical list of items                                                                                       |
+| **List Item (item)**    | `list_item`       | Used inside `vertical_list`, `leadingIcon/leadingImage`, `subtitle`, optional `trailingTag`/`tagColor`, tap `action` |
 
-| Type               | JSON `type`       | Notes                                                                                          |
-| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------- |
-| Header             | `header`          | Large, bold section header                                                                     |
-| Text               | `text`            | Paragraph/body text                                                                            |
-| Image              | `image`           | Supports `asset://` and `http(s)://`, plus `fit`                                               |
-| Button             | `button`          | Single action button (`action` field)                                                          |
-| Card               | `card`            | Title/body, **card-wide `action` (primary)**, and action buttons (`actions[]`)                 |
-| Horizontal List    | `horizontal_list` | Title + horizontal scroll of `square_card` items                                               |
-| Square Card (item) | `square_card`     | **150Ã—150 dp** card with background color/image and tap action (used inside `horizontal_list`) |
 
 
 ### Actions (side-effects)
@@ -71,7 +75,7 @@ If omitted, the renderer derives a sensible default (e.g., navigate("/detail") â
 }
 ```
 
-```assets/json/detail.json```
+```assets/json/detail.json``` (E-Commerce style)
 
 ```
 {
@@ -121,6 +125,96 @@ If omitted, the renderer derives a sensible default (e.g., navigate("/detail") â
           "bgColor": "#F5FFF6",
           "image": "asset://images/banner.jpg",
           "action": { "type": "toast", "message": "Basic Cap tapped" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+```assets/json/insights.json``` (Dashboard style)
+
+```
+{
+  "version": 1,
+  "title": "Insights",
+  "components": [
+    { "type": "header", "text": "Weekly Insights" },
+    { "type": "text", "text": "A lightweight analytics-style screen rendered from JSON." },
+
+    {
+      "type": "grid",
+      "title": "Key Metrics",
+      "items": [
+        {
+          "type": "metric_card",
+          "title": "Active Users",
+          "value": "2,431",
+          "delta": "+12%",
+          "bgColor": "#F3F6FF",
+          "icon": "person",
+          "action": { "type": "toast", "message": "Active Users tapped" }
+        },
+        {
+          "type": "metric_card",
+          "title": "Orders",
+          "value": "812",
+          "delta": "+5%",
+          "bgColor": "#F5FFF6",
+          "icon": "shopping_cart",
+          "action": { "type": "toast", "message": "Orders tapped" }
+        },
+        {
+          "type": "metric_card",
+          "title": "Refunds",
+          "value": "14",
+          "delta": "-2%",
+          "bgColor": "#FFF4F2",
+          "icon": "receipt",
+          "action": { "type": "toast", "message": "Refunds tapped" }
+        },
+        {
+          "type": "metric_card",
+          "title": "Revenue",
+          "value": "$12.4k",
+          "delta": "+3%",
+          "bgColor": "#FFF8E1",
+          "icon": "attach_money",
+          "action": { "type": "toast", "message": "Revenue tapped" }
+        }
+      ]
+    },
+
+    {
+      "type": "vertical_list",
+      "title": "Whatâ€™s New",
+      "items": [
+        {
+          "type": "list_item",
+          "title": "App 1.2.0 Released",
+          "subtitle": "New SDUI components and bug fixes",
+          "leadingIcon": "bolt",
+          "trailingTag": "Release",
+          "tagColor": "#E6F7FF",
+          "action": { "type": "navigate", "route": "/detail" }
+        },
+        {
+          "type": "list_item",
+          "title": "Design Refresh",
+          "subtitle": "Updated typography and cards",
+          "leadingIcon": "brush",
+          "trailingTag": "Design",
+          "tagColor": "#F5FFF6",
+          "action": { "type": "toast", "message": "Opened article" }
+        },
+        {
+          "type": "list_item",
+          "title": "Read Our Guide",
+          "subtitle": "How to structure JSON for SDUI",
+          "leadingIcon": "book",
+          "trailingTag": "Docs",
+          "tagColor": "#FFF8E1",
+          "action": { "type": "open_url", "url": "https://example.com" }
         }
       ]
     }

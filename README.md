@@ -1,16 +1,16 @@
-# server_driven_ui_example
+## Server-Driven UI (Flutter, Local Assets)
 
-A new Flutter project.
+Render entire screens from JSON — no server required. Convention-based routing, typed components/actions, centralized side-effects, and production-ready structure.
 
-## Getting Started
+## Introduction
 
-This project is a starting point for a Flutter application.
+This repository is a Server-Driven UI (SDUI) playground built with Flutter.
+Instead of hard-coding screens, the app loads local JSON assets and renders views at runtime.
 
-A few resources to get you started if this is your first Flutter project:
+* Convention-over-configuration routing: "/detail" → assets/json/detail.json
+* Typed components & actions with a clean renderer layer
+* Centralized side-effects (navigation / open URL / toast / track)
+* Clickable cards (primary tap action) and horizontal, scrollable lists
+* Asset image scheme: asset://images/banner.jpg (offline-friendly)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This is ideal for demonstrating architecture thinking and product-grade code quality without spinning up a backend.

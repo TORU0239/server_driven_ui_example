@@ -1,17 +1,14 @@
-// Component union with factory parser by "type".
-// Added: HorizontalListComponent + SquareCardItem
-// CardComponent now supports an optional primaryAction for card-wide tap.
+// Added: GridComponent/MetricCardItem, VerticalListComponent/ListItem
+// Existing components unchanged. CardComponent keeps primaryAction + actions (with labels).
 
 import 'package:flutter/material.dart';
 import '../actions/server_driven_ui_actions.dart';
 import '../util/boxfit_parser.dart';
 import '../util/color_parser.dart';
 
-/// Base class for all server-driven components.
 abstract class ServerDrivenUIComponent {
   const ServerDrivenUIComponent();
 
-  /// Parses a component from its JSON representation using the "type" discriminator.
   factory ServerDrivenUIComponent.fromJson(Map<String, dynamic> json) {
     switch ((json['type'] as String?)?.toLowerCase()) {
       case 'header':
@@ -31,9 +28,7 @@ abstract class ServerDrivenUIComponent {
 
       case 'card':
         {
-          // Optional primary tap action for the card itself.
           final primary = ServerDrivenUIAction.tryParse(json['action']);
-          // Button actions (with optional per-button label).
           final rawActs = (json['actions'] as List<dynamic>? ?? []);
           final acts = <LabeledAction>[];
           for (final raw in rawActs) {
@@ -64,12 +59,40 @@ abstract class ServerDrivenUIComponent {
           for (final it in itemsRaw) {
             if (it is Map<String, dynamic>) {
               final type = (it['type'] as String?)?.toLowerCase();
-              if (type == 'square_card') {
-                items.add(SquareCardItem.fromJson(it));
-              }
+              if (type == 'square_card') items.add(SquareCardItem.fromJson(it));
             }
           }
           return HorizontalListComponent(title: title, items: items);
+        }
+
+      // ✅ NEW: Grid + MetricCard items
+      case 'grid':
+        {
+          final title = json['title'] as String?;
+          final itemsRaw = (json['items'] as List<dynamic>? ?? []);
+          final items = <MetricCardItem>[];
+          for (final it in itemsRaw) {
+            if (it is Map<String, dynamic>) {
+              final type = (it['type'] as String?)?.toLowerCase();
+              if (type == 'metric_card') items.add(MetricCardItem.fromJson(it));
+            }
+          }
+          return GridComponent(title: title, items: items);
+        }
+
+      // ✅ NEW: Vertical list + ListItem items
+      case 'vertical_list':
+        {
+          final title = json['title'] as String?;
+          final itemsRaw = (json['items'] as List<dynamic>? ?? []);
+          final items = <ListItem>[];
+          for (final it in itemsRaw) {
+            if (it is Map<String, dynamic>) {
+              final type = (it['type'] as String?)?.toLowerCase();
+              if (type == 'list_item') items.add(ListItem.fromJson(it));
+            }
+          }
+          return VerticalListComponent(title: title, items: items);
         }
 
       default:
@@ -78,41 +101,36 @@ abstract class ServerDrivenUIComponent {
   }
 }
 
-/// Big bold header text.
+// --- Existing components (unchanged) ---
+
 class HeaderComponent extends ServerDrivenUIComponent {
   final String text;
   const HeaderComponent({required this.text});
 }
 
-/// Body text paragraph.
 class TextComponent extends ServerDrivenUIComponent {
   final String text;
   const TextComponent({required this.text});
 }
 
-/// Image with configurable BoxFit. Supports "asset://" scheme in renderer.
 class ImageComponent extends ServerDrivenUIComponent {
   final String url;
   final BoxFit fit;
   const ImageComponent({required this.url, this.fit = BoxFit.cover});
 }
 
-/// Button with an optional action attached.
 class ButtonComponent extends ServerDrivenUIComponent {
   final String text;
   final ServerDrivenUIAction? action;
   const ButtonComponent({required this.text, this.action});
 }
 
-/// A pair of an action and an optional UI label (from JSON "label") for button rows.
 class LabeledAction {
   final ServerDrivenUIAction action;
   final String? label;
   const LabeledAction({required this.action, this.label});
 }
 
-/// Card layout with title/body and optional buttons.
-/// [primaryAction] is executed when the card itself is tapped.
 class CardComponent extends ServerDrivenUIComponent {
   final String title;
   final String body;
@@ -126,19 +144,17 @@ class CardComponent extends ServerDrivenUIComponent {
   });
 }
 
-/// Horizontal list of square product-like cards.
 class HorizontalListComponent extends ServerDrivenUIComponent {
   final String? title;
   final List<SquareCardItem> items;
   const HorizontalListComponent({this.title, required this.items});
 }
 
-/// A 150x150 square card item used inside [HorizontalListComponent].
 class SquareCardItem {
   final String title;
   final String? subtitle;
-  final String? image; // asset://... or http(s)://...
-  final Color? bgColor; // parsed from hex like "#F3F6FF"
+  final String? image;
+  final Color? bgColor;
   final ServerDrivenUIAction action;
 
   const SquareCardItem({
@@ -162,7 +178,87 @@ class SquareCardItem {
   }
 }
 
-/// Unknown component used as a safety net for forward-compatible JSON.
+// --- NEW: Grid ---
+
+class GridComponent extends ServerDrivenUIComponent {
+  final String? title;
+  final List<MetricCardItem> items;
+  const GridComponent({this.title, required this.items});
+}
+
+class MetricCardItem {
+  final String title;
+  final String value;
+  final String? delta; // e.g., "+12%" / "-2%"
+  final Color? bgColor;
+  final String? iconName; // e.g., "person", "shopping_cart"
+  final ServerDrivenUIAction action;
+
+  const MetricCardItem({
+    required this.title,
+    required this.value,
+    this.delta,
+    this.bgColor,
+    this.iconName,
+    required this.action,
+  });
+
+  factory MetricCardItem.fromJson(Map<String, dynamic> json) {
+    return MetricCardItem(
+      title: json['title'] as String? ?? '',
+      value: json['value'] as String? ?? '',
+      delta: json['delta'] as String?,
+      bgColor: parseHexColor(json['bgColor'] as String?),
+      iconName: json['icon'] as String?,
+      action:
+          ServerDrivenUIAction.tryParse(json['action']) ??
+          const ToastAction(message: 'Tapped'),
+    );
+  }
+}
+
+// --- NEW: Vertical List ---
+
+class VerticalListComponent extends ServerDrivenUIComponent {
+  final String? title;
+  final List<ListItem> items;
+  const VerticalListComponent({this.title, required this.items});
+}
+
+class ListItem {
+  final String title;
+  final String? subtitle;
+  final String? leadingIcon; // material icon name
+  final String? leadingImage; // asset:// or http(s)://
+  final String? trailingTag; // small tag on the right
+  final Color? tagColor; // background color for tag
+  final ServerDrivenUIAction action;
+
+  const ListItem({
+    required this.title,
+    this.subtitle,
+    this.leadingIcon,
+    this.leadingImage,
+    this.trailingTag,
+    this.tagColor,
+    required this.action,
+  });
+
+  factory ListItem.fromJson(Map<String, dynamic> json) {
+    return ListItem(
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String?,
+      leadingIcon: json['leadingIcon'] as String?,
+      leadingImage: json['leadingImage'] as String?,
+      trailingTag: json['trailingTag'] as String?,
+      tagColor: parseHexColor(json['tagColor'] as String?),
+      action:
+          ServerDrivenUIAction.tryParse(json['action']) ??
+          const ToastAction(message: 'Tapped'),
+    );
+  }
+}
+
 class UnknownComponent extends ServerDrivenUIComponent {
   final Map<String, dynamic> raw;
   const UnknownComponent({required this.raw});

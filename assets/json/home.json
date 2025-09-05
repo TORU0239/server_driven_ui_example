@@ -19,9 +19,31 @@
       ]
     },
 
-    { "type": "button", "text": "Go to Detail", "action": { "type": "navigate", "route": "/detail" } },
-    { "type": "button", "text": "Say Hi (Toast)", "action": { "type": "toast", "message": "Hi from Button!" } },
-    { "type": "button", "text": "Visit Google.com", "action": { "type": "open_url", "url": "https://google.com" } },
-    { "type": "button", "text": "Track Event (Console)", "action": { "type": "track", "event": "home_track_tap", "props": { "from": "home_button" } } }
+    { 
+      "type": "button", 
+      "text": "Go to Detail", 
+      "action": { "type": "navigate", "route": "/detail" } 
+    },
+    {
+      "type": "button",
+      "text": "Open Insights",
+      "action": { "type": "navigate", "route": "/insights" }
+    },
+
+    { 
+      "type": "button", 
+      "text": "Say Hi (Toast)", 
+      "action": { "type": "toast", "message": "Hi from Button!" } 
+    },
+    { 
+      "type": "button",
+      "text": "Visit Google.com", 
+      "action": { "type": "open_url", "url": "https://google.com" } 
+    },
+    { 
+      "type": "button", 
+      "text": "Track Event (Console)", 
+      "action": { "type": "track", "event": "home_track_tap", "props": { "from": "home_button" } } 
+    }
   ]
 }
